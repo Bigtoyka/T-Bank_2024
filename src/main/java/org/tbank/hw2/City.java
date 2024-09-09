@@ -1,4 +1,4 @@
-package main.java.org.tbank;
+package org.tbank.hw2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -25,7 +25,7 @@ public class City {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             logger.info("Starting to read JSON file.");
-            File fileout = new File("src/main/java/org/tbank/output.xml");
+            File fileout = new File("src/main/resources/output.xml");
             City json = objectMapper.readValue(file, City.class);
             logger.info("Successfully read JSON file", json);
             logger.debug("Coordinates: {}", json.getCoords());
