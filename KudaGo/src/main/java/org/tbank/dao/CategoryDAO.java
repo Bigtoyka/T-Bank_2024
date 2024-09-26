@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class CategoryDAO implements DAO<Integer, Category> {
+public class CategoryDAO implements UniversalDAO<Integer, Category> {
     private final ConcurrentHashMap<Integer, Category> concurrentHashMap = new ConcurrentHashMap<>();
 
     @Override

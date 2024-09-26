@@ -8,8 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 public class Location {
-    private String slug;
-    private String name;
+    private final String slug;
+    private final String name;
 }

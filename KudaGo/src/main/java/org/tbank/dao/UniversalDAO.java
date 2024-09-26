@@ -2,7 +2,7 @@ package org.tbank.dao;
 
 import java.util.Collection;
 
-public interface DAO<K,V> {
+public interface UniversalDAO<K,V> {
 
     public void put(K key, V value);
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class TimeExecutionAspect {
-    @Around("@annotation(org.tbank.annotations.TimeExecution)")
+    @Around("@within(org.tbank.annotations.TimeExecution) || @annotation(org.tbank.annotations.TimeExecution)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
 

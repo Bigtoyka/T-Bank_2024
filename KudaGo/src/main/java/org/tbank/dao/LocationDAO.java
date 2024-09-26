@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class LocationDAO implements DAO<String, Location> {
+public class LocationDAO implements UniversalDAO<String, Location> {
     private ConcurrentHashMap<String, Location> concurrentHashMap = new ConcurrentHashMap<>();
 
     @Override
