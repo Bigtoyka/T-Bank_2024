@@ -31,15 +31,13 @@ public class DataInitConfig {
             try {
                 log.info("Инициализация категорий");
                 Optional<Category[]> categories = kudaGoClient.requestCategories();
-                if (categories.isPresent()) {
-                    for (Category category : categories.get()) {
+                categories.ifPresent(cat -> {
+                    for (Category category : cat) {
                         categoryDAO.put(category.getId(), category);
                         log.info("Инициализированные категории: {}", category.getId());
                     }
                     log.info("Категории успешно инициализированы");
-                } else {
-                    log.warn("Категории не найдены");
-                }
+                });
             } catch (Exception e) {
                 log.error("Ошибка инициализации категорий: ", e);
             }
@@ -47,18 +45,17 @@ public class DataInitConfig {
             try {
                 log.info("Инициализация локаций.");
                 Optional<Location[]> locations = kudaGoClient.requestLocation();
-                if (locations.isPresent()) {
-                    for (Location location : locations.get()) {
+                locations.ifPresent(loc -> {
+                    for (Location location : loc) {
                         locationDAO.put(location.getSlug(), location);
                         log.info("Инициализированные локации: {}", location.getSlug());
                     }
                     log.info("Локации успешно инициализированы");
-                } else {
-                    log.warn("Локации не найдены");
-                }
+                });
             } catch (Exception e) {
                 log.error("Ошибка инициализации локаций: ", e);
             }
+
             log.info("Инициализация данных завершена");
         };
     }
