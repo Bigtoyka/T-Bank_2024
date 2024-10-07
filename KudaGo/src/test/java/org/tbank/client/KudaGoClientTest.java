@@ -11,20 +11,21 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 @Testcontainers
 @SpringBootTest
 class KudaGoClientTest {
     @Container
-    static WireMockContainer wireMockContainer = new WireMockContainer("wiremock/wiremock:2.35.1-1-alpine")
-            .withMappingFromResource("locations", KudaGoClient.class, "locations.json")
-            .withMappingFromResource("categories", KudaGoClient.class, "categories.json");
+    static WireMockContainer wireMockContainer = new WireMockContainer("wiremock/wiremock:2.35.0")
+            .withMappingFromResource("locations.json")
+            .withMappingFromResource("categories.json");
 
     @Autowired
     private KudaGoClient kudaGoClient;
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("kudago.base-url", wireMockContainer::getBaseUrl);
+        registry.add("https://kudago.com/public-api/v1.4", wireMockContainer::getBaseUrl);
     }
 
 
@@ -32,7 +33,15 @@ class KudaGoClientTest {
     @DisplayName("Возвращение locations")
     public void requestLocations_locationsIsNotEmpty_shouldBeNotEmpty() {
         var locations = kudaGoClient.requestLocation();
-        assertThat(locations).isNotEmpty();
+        assertThat(locations)
+                .isPresent()
+                .hasValueSatisfying(array ->
+                        assertThat(array)
+                                .isNotEmpty()
+                                .anySatisfy(location ->
+                                        assertThat(location.getSlug()).isEqualTo("msk")
+                                )
+                );
     }
 
     @Test

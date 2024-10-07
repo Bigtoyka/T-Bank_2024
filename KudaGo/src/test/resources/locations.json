@@ -1,22 +1,37 @@
-[
-  {
-    "slug": "msk",
-    "name": "Москва"
+{
+  "request": {
+    "method": "GET",
+    "url": "/locations/"
   },
-  {
-    "slug": "spb",
-    "name": "Санкт-Петербург"
-  },
-  {
-    "slug": "nnv",
-    "name": "Нижний Новгород"
-  },
-  {
-    "slug": "ekb",
-    "name": "Екатеринбург"
-  },
-  {
-    "slug": "kzn",
-    "name": "Казань"
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "slug": "msk",
+        "name": "Москва"
+      },
+      {
+        "slug": "spb",
+        "name": "Санкт-Петербург"
+      },
+      {
+        "slug": "nnv",
+        "name": "Нижний Новгород"
+      },
+      {
+        "slug": "ekb",
+        "name": "Екатеринбург"
+      },
+      {
+        "slug": "kzn",
+        "name": "Казань"
+      }
+    ],
+    "transformers": [
+      "json-body-transformer"
+    ]
   }
-]
+}
