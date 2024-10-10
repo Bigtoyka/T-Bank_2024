@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Currency Conversion API
+  description: API для получения курсов валют и конвертации валют с использованием данных Центрального Банка России.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+paths:
+  /currencies/rates/{code}:
+    get:
+      summary: Получить курс валюты
+      description: Получает курс валюты по коду (например, USD, EUR) из ЦБР.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Код валюты (например, USD, EUR)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный ответ с курсом валюты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyRateResponse'
+        '400':
+          description: Неверный запрос (некорректный код валюты)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Валюта не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /currencies/convert:
+    post:
+      summary: Конвертировать валюту
+      description: Конвертация указанной суммы из одной валюты в другую с использованием курсов ЦБР.
+      requestBody:
+        description: Данные для конвертации валют
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurrencyConversionRequest'
+      responses:
+        '200':
+          description: Успешный ответ с результатом конвертации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyConversionResponse'
+        '400':
+          description: Неверный запрос (некорректные параметры)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CurrencyRateResponse:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Код валюты (например, USD, EUR)
+        rate:
+          type: number
+          description: Текущий курс валюты относительно рубля
+      example:
+        currency: "USD"
+        rate: 74.15
+    CurrencyConversionRequest:
+      type: object
+      properties:
+        fromCurrency:
+          type: string
+          description: Код исходной валюты (например, USD)
+        toCurrency:
+          type: string
+          description: Код целевой валюты (например, EUR)
+        amount:
+          type: number
+          description: Сумма для конвертации
+      required:
+        - fromCurrency
+        - toCurrency
+        - amount
+      example:
+        fromCurrency: "USD"
+        toCurrency: "RUB"
+        amount: 100
+    CurrencyConversionResponse:
+      type: object
+      properties:
+        fromCurrency:
+          type: string
+          description: Код исходной валюты
+        toCurrency:
+          type: string
+          description: Код целевой валюты
+        convertedAmount:
+          type: number
+          description: Результат конвертации
+      example:
+        fromCurrency: "USD"
+        toCurrency: "RUB"
+        convertedAmount: 7400
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Код ошибки
+        message:
+          type: string
+          description: Описание ошибки
+      example:
+        code: 400
+        message: "Неверный код валюты"
