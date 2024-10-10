@@ -1,0 +1,67 @@
+plugins {
+    id 'org.openapi.generator' version '6.0.1'
+    id 'java'
+}
+
+group = 'org.tbank.cbrapp'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    //Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web:3.3.4")
+        // Test
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.3.4")
+
+    // lombok
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    annotationProcessor 'org.projectlombok:lombok:1.18.34' // Укажите последнюю версию
+
+
+    // jakarta to XML
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.2'
+
+
+    //resilience4j CircuitBraker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.0.2'
+    implementation("org.springframework.boot:spring-boot-starter-aop:3.3.4")
+
+    // Coffein cache
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8' // Или последняя версия
+    implementation 'org.jetbrains:annotations:25.0.0'
+    implementation("org.springframework.boot:spring-boot-starter-cache:3.3.4")
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Validator
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.3.4")
+
+    //Swager
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "/Users/bigtoy/IdeaProjects/T-Bank_2024/CbrApp/src/main/resources/openapi.yaml"  // Убедитесь, что файл существует
+    outputDir = "/Users/bigtoy/IdeaProjects/T-Bank_2024/CbrApp/src/main/generated"  // Каталог для генерации
+    apiPackage = "org.tbank.cbrapp.api"
+    modelPackage = "org.tbank.cbrapp.model"
+    invokerPackage = "org.tbank.cbrapp.invoker"
+    modelNameSuffix = "Dto"
+    configOptions = [
+            dateLibrary: "java8"  // Используемая библиотека для дат
+    ]
+}
+

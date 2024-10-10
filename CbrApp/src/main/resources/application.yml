@@ -1,0 +1,22 @@
+currency:
+  cbr-url: "http://www.cbr.ru/scripts/XML_daily.asp"
+resilience4j.circuitbreaker:
+  instances:
+    currencyService:
+      registerHealthIndicator: true
+      slidingWindowSize: 10
+      failureRateThreshold: 50
+      waitDurationInOpenState: 5000
+      permittedNumberOfCallsInHalfOpenState: 3
+      minimumNumberOfCalls: 10
+      slidingWindowType: COUNT_BASED
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: expireAfterWrite=3600s
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
