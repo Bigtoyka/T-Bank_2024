@@ -1,0 +1,84 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'org.tbank'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':StarterExecution')
+
+    // JUnit 5 (Jupiter)
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // Spring Boot dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.3.3'
+    implementation 'org.springframework.boot:spring-boot-starter:3.3.3'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-test', version: '3.3.4'
+    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure:3.3.4")
+
+
+
+    // AspectJ
+    implementation 'org.aspectj:aspectjweaver:1.9.22.1'
+    implementation 'org.springframework.boot:spring-boot-starter-aop:3.3.4'
+
+    // Spring Boot configuration processor
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.3'
+
+    // Mockito
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+
+    // Testcontainers
+    testImplementation 'org.testcontainers:junit-jupiter:1.18.2'
+// https://mvnrepository.com/artifact/org.testcontainers/testcontainers
+    testImplementation("org.testcontainers:testcontainers:1.18.2")
+
+    // WireMock
+    testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
+    testImplementation("org.assertj:assertj-core:3.26.3")
+    implementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14'
+
+
+
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'org/tbank/models/**'
+            ])
+        }))
+    }
+}
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+}
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+

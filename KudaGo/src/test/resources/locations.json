@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/locations/"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "slug": "msk",
+        "name": "Москва"
+      },
+      {
+        "slug": "spb",
+        "name": "Санкт-Петербург"
+      },
+      {
+        "slug": "nnv",
+        "name": "Нижний Новгород"
+      },
+      {
+        "slug": "ekb",
+        "name": "Екатеринбург"
+      },
+      {
+        "slug": "kzn",
+        "name": "Казань"
+      }
+    ],
+    "transformers": [
+      "json-body-transformer"
+    ]
+  }
+}
