@@ -1,17 +1,20 @@
 package org.tbank.cbrapp.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.tbank.cbrapp.DTO.CurrencyConversionRequest;
-import org.tbank.cbrapp.DTO.CurrencyConversionResponse;
-import org.tbank.cbrapp.DTO.CurrencyRateResponse;
+import org.tbank.cbrapp.dto.CurrencyConversionRequest;
+import org.tbank.cbrapp.dto.CurrencyConversionResponse;
+import org.tbank.cbrapp.dto.CurrencyRateResponse;
+import org.tbank.cbrapp.exception.BadRequestException;
 import org.tbank.cbrapp.exception.CurrencyNotFoundException;
+import org.tbank.cbrapp.exception.ServiceUnavailableException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -22,49 +25,66 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
-import java.time.Duration;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Service
 public class CurrencyService {
     private final RestTemplate restTemplate;
-    private final Cache<String, Double> cache;
-
+    private final String dateReq ="?date_req=";
+    private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     @Value("${currency.cbr-url}")
     private String cbrUrl;
 
     public CurrencyService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.cache = Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofHours(1))
-                .build();
     }
     @Cacheable("currencyRates")
     @CircuitBreaker(name = "currencyService", fallbackMethod = "fallbackGetCurrencyRate")
     public CurrencyRateResponse getCurrencyRate(String code) {
-        String url = cbrUrl + "?date_req=" + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        String url = cbrUrl + dateReq + LocalDate.now().format(dateFormat);
+        log.info("Запрос курса валюты для кода: {}", code);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.getForEntity(url, String.class);
+            log.info("Ответ от ЦБ для валюты {}: {}", code, response.getBody());
+        } catch (HttpClientErrorException e) {
+            log.error("Неверный запрос к ЦБ для валюты {}: {}", code, e.getMessage());
+            throw new BadRequestException("Неверный запрос к ЦБ: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            log.error("API ЦБ недоступно {}: {}", code, e.getMessage());
+            throw new ServiceUnavailableException("API ЦБ недоступно: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Неизвестная ошибка при запросе валюты {}: {}", code, e.getMessage());
+            throw new RuntimeException("Неизвестная ошибка: " + e.getMessage());
+        }
 
         if (response.getStatusCode().is2xxSuccessful()) {
             String xmlResponse = response.getBody();
             double rate = parseCurrencyRateFromXml(xmlResponse, code);
-            cache.put(code.toUpperCase(), rate);
+            log.info("Курс валюты {}: {}", code, rate);
             return new CurrencyRateResponse(code, rate);
         } else {
-            throw new RuntimeException("Ошибка получения данных от ЦБ");
+            log.error("Ошибка получения данных от ЦБ для валюты {}", code);
+            throw new BadRequestException("Ошибка получения данных от ЦБ");
         }
     }
 
     public CurrencyConversionResponse convertCurrency(CurrencyConversionRequest request) {
+        log.info("Конвертация валюты {} в {}", request.getFromCurrency(), request.getToCurrency());
+        BigDecimal fromRate = BigDecimal.valueOf(getCurrencyRate(request.getFromCurrency()).getRate());
+        BigDecimal toRate = BigDecimal.valueOf(getCurrencyRate(request.getToCurrency()).getRate());
 
-        double fromRate = getCurrencyRate(request.getFromCurrency()).getRate();
-        double toRate = getCurrencyRate(request.getToCurrency()).getRate();
-        if (fromRate == 0 || toRate == 0) {
+        if (fromRate.compareTo(BigDecimal.ZERO) == 0 || toRate.compareTo(BigDecimal.ZERO) == 0) {
+            log.error("Валюта не найдена для конвертации: {} или {}", request.getFromCurrency(), request.getToCurrency());
             throw new CurrencyNotFoundException("Валюта не была найдена в списке ЦБ");
         }
-        double convertedAmount = (request.getAmount() * fromRate) / toRate;
-        return new CurrencyConversionResponse(request.getFromCurrency(), request.getToCurrency(), convertedAmount);
+        BigDecimal convertedAmount = request.getAmount().multiply(fromRate).divide(toRate, 2, RoundingMode.HALF_UP);
+        log.info("Конвертированная сумма: {}", convertedAmount);
+        return new CurrencyConversionResponse(request.getFromCurrency(), request.getToCurrency(), convertedAmount.doubleValue());
     }
 
     private double parseCurrencyRateFromXml(String xmlResponse, String currencyCode) {

@@ -1,4 +1,4 @@
-package org.tbank.cbrapp.DTO;
+package org.tbank.cbrapp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

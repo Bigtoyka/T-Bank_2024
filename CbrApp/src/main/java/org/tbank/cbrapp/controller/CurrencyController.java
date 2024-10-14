@@ -1,4 +1,4 @@
-package org.tbank.cbrapp.ontroller;
+package org.tbank.cbrapp.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.tbank.cbrapp.DTO.CurrencyConversionRequest;
-import org.tbank.cbrapp.DTO.CurrencyConversionResponse;
-import org.tbank.cbrapp.DTO.CurrencyRateResponse;
+import org.tbank.cbrapp.dto.CurrencyConversionRequest;
+import org.tbank.cbrapp.dto.CurrencyConversionResponse;
+import org.tbank.cbrapp.dto.CurrencyRateResponse;
 import org.tbank.cbrapp.service.CurrencyService;
 
 @RestController

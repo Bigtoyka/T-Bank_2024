@@ -1,5 +1,6 @@
 package org.tbank.cbrapp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -13,10 +14,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.junit.jupiter.api.Test;
-import org.tbank.cbrapp.DTO.CurrencyConversionRequest;
-import org.tbank.cbrapp.DTO.CurrencyConversionResponse;
+import org.tbank.cbrapp.dto.CurrencyConversionRequest;
+import org.tbank.cbrapp.dto.CurrencyConversionResponse;
+import org.tbank.cbrapp.dto.CurrencyRateResponse;
 import org.tbank.cbrapp.exception.ServiceUnavailableException;
 import org.tbank.cbrapp.service.CurrencyService;
+
+import java.math.BigDecimal;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,6 +40,20 @@ public class CurrencyControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void testConvertSameCurrency() throws Exception {
+        CurrencyConversionRequest request = new CurrencyConversionRequest("USD", "USD", new BigDecimal("100.00"));
+        CurrencyConversionResponse mockResponse = new CurrencyConversionResponse("USD", "USD", 100.0);
+        when(currencyService.convertCurrency(any(CurrencyConversionRequest.class)))
+                .thenReturn(mockResponse);
+        mockMvc.perform(post("/currencies/convert")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"fromCurrency\": \"USD\", \"toCurrency\": \"USD\", \"amount\": 100 }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fromCurrency").value("USD"))
+                .andExpect(jsonPath("$.toCurrency").value("USD"))
+                .andExpect(jsonPath("$.convertedAmount").value(100.0));
+    }
 
     @Test
     public void testConvertCurrency() throws Exception {

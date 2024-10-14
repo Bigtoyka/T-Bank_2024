@@ -5,7 +5,7 @@ resilience4j.circuitbreaker:
     currencyService:
       registerHealthIndicator: true
       slidingWindowSize: 10
-      failureRateThreshold: 50
+      failureRateThreshold: 70
       waitDurationInOpenState: 5000
       permittedNumberOfCallsInHalfOpenState: 3
       minimumNumberOfCalls: 10

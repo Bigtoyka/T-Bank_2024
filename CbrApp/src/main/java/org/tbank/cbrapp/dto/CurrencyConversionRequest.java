@@ -1,10 +1,14 @@
-package org.tbank.cbrapp.DTO;
+package org.tbank.cbrapp.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-// Запрос для POST /currencies/convert
+import java.math.BigDecimal;
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class CurrencyConversionRequest {
     @NotNull
@@ -12,5 +16,5 @@ public class CurrencyConversionRequest {
     @NotNull
     private String toCurrency;
     @Positive(message = "Тольок положительное значение")
-    private double amount;
+    private BigDecimal amount;
 }
