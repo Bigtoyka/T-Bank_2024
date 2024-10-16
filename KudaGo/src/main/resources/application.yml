@@ -4,12 +4,3 @@ api:
   url:
     categories: https://kudago.com/public-api/v1.4/place-categories
     locations: https://kudago.com/public-api/v1.4/locations
-app:
-  fixed:
-    threadpool:
-      size: 8
-  scheduled:
-    threadpool:
-      size: 5
-  initialization:
-    schedule: PT1S
