@@ -14,6 +14,7 @@ import org.tbank.exception.CurrencyNotFoundException;
 import org.tbank.exception.ServiceUnavailableException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import reactor.core.publisher.Mono;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,48 +41,57 @@ public class CurrencyService {
         this.restTemplate = restTemplate;
     }
     @Cacheable("currencyRates")
-    public CurrencyRateResponse getCurrencyRate(String code) {
-        String url = cbrUrl + dateReq + LocalDate.now().format(dateFormat);
-        log.info("Запрос курса валюты для кода: {}", code);
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.getForEntity(url, String.class);
-            log.info("Ответ от ЦБ для валюты {}: {}", code, response.getBody());
-        } catch (HttpClientErrorException e) {
-            log.error("Неверный запрос к ЦБ для валюты {}: {}", code, e.getMessage());
-            throw new BadRequestException("Неверный запрос к ЦБ: " + e.getMessage());
-        } catch (HttpServerErrorException e) {
-            log.error("API ЦБ недоступно {}: {}", code, e.getMessage());
-            throw new ServiceUnavailableException("API ЦБ недоступно: " + e.getMessage());
-        } catch (Exception e) {
-            log.error("Неизвестная ошибка при запросе валюты {}: {}", code, e.getMessage());
-            throw new RuntimeException("Неизвестная ошибка: " + e.getMessage());
-        }
+    public Mono<CurrencyRateResponse> getCurrencyRate(String code) {
+        return Mono.fromCallable(() -> {
+            String url = cbrUrl + dateReq + LocalDate.now().format(dateFormat);
+            log.info("Запрос курса валюты для кода: {}", code);
+            ResponseEntity<String> response;
+            try {
+                response = restTemplate.getForEntity(url, String.class);
+                log.info("Ответ от ЦБ для валюты {}: {}", code, response.getBody());
+            } catch (HttpClientErrorException e) {
+                log.error("Неверный запрос к ЦБ для валюты {}: {}", code, e.getMessage());
+                throw new CurrencyNotFoundException("Неверный запрос к ЦБ: " + e.getMessage());
+            } catch (HttpServerErrorException e) {
+                log.error("API ЦБ недоступно для валюты {}: {}", code, e.getMessage());
+                throw new ServiceUnavailableException("API ЦБ недоступно: " + e.getMessage());
+            } catch (Exception e) {
+                log.error("Неизвестная ошибка при запросе валюты {}: {}", code, e.getMessage());
+                throw new RuntimeException("Неизвестная ошибка: " + e.getMessage());
+            }
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            String xmlResponse = response.getBody();
-            double rate = parseCurrencyRateFromXml(xmlResponse, code);
-            log.info("Курс валюты {}: {}", code, rate);
-            return new CurrencyRateResponse(code, rate);
-        } else {
-            log.error("Ошибка получения данных от ЦБ для валюты {}", code);
-            throw new BadRequestException("Ошибка получения данных от ЦБ");
-        }
+            if (response.getStatusCode().is2xxSuccessful()) {
+                String xmlResponse = response.getBody();
+                double rate = parseCurrencyRateFromXml(xmlResponse, code);
+                log.info("Курс валюты {}: {}", code, rate);
+                return new CurrencyRateResponse(code, rate);
+            } else {
+                log.error("Ошибка получения данных от ЦБ для валюты {}", code);
+                throw new CurrencyNotFoundException("Ошибка получения данных от ЦБ");
+            }
+        });
     }
 
-    public CurrencyConversionResponse convertCurrency(CurrencyConversionRequest request) {
-        log.info("Конвертация валюты {} в {}", request.getFromCurrency(), request.getToCurrency());
-        BigDecimal fromRate = BigDecimal.valueOf(getCurrencyRate(request.getFromCurrency()).getRate());
-        BigDecimal toRate = BigDecimal.valueOf(getCurrencyRate(request.getToCurrency()).getRate());
+    public Mono<CurrencyConversionResponse> convertCurrency(CurrencyConversionRequest request) {
+        return Mono.zip(
+                getCurrencyRate(request.getFromCurrency()),
+                getCurrencyRate(request.getToCurrency())
+        ).flatMap(tuple -> {
+            CurrencyRateResponse fromRate = tuple.getT1();
+            CurrencyRateResponse toRate = tuple.getT2();
 
-        if (fromRate.compareTo(BigDecimal.ZERO) == 0 || toRate.compareTo(BigDecimal.ZERO) == 0) {
-            log.error("Валюта не найдена для конвертации: {} или {}", request.getFromCurrency(), request.getToCurrency());
-            throw new CurrencyNotFoundException("Валюта не была найдена в списке ЦБ");
-        }
-        BigDecimal convertedAmount = request.getAmount().multiply(fromRate).divide(toRate, 2, RoundingMode.HALF_UP);
-        log.info("Конвертированная сумма: {}", convertedAmount);
-        return new CurrencyConversionResponse(request.getFromCurrency(), request.getToCurrency(), convertedAmount.doubleValue());
-    }
+            if (fromRate.getRate() == 0 || toRate.getRate() == 0) {
+                log.error("Валюта не найдена для конвертации: {} или {}", request.getFromCurrency(), request.getToCurrency());
+                throw new CurrencyNotFoundException("Валюта не была найдена в списке ЦБ");
+            }
+
+            BigDecimal convertedAmount = request.getAmount()
+                    .multiply(BigDecimal.valueOf(fromRate.getRate()))
+                    .divide(BigDecimal.valueOf(toRate.getRate()), 2, RoundingMode.HALF_UP);
+
+            log.info("Конвертированная сумма: {}", convertedAmount);
+            return Mono.just(new CurrencyConversionResponse(request.getFromCurrency(), request.getToCurrency(), convertedAmount.doubleValue()));
+        });}
 
     private double parseCurrencyRateFromXml(String xmlResponse, String currencyCode) {
         try {

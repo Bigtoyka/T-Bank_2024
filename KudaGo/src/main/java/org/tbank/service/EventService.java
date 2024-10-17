@@ -9,10 +9,11 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.tbank.models.Event;
 import org.tbank.models.KudaGoResponse;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -29,22 +30,22 @@ public class EventService {
         this.restTemplate = restTemplate;
     }
 
-    public CompletableFuture<List<Event>> getEventsFromKudaGo(LocalDate start, LocalDate end) {
-        return CompletableFuture.supplyAsync(() -> {
+    public Mono<List<Event>> getEventsFromKudaGo(LocalDate start, LocalDate end) {
+        return Mono.fromCallable(() -> {
             String url = KUDAGO_API_URL_EVENT + fields + start + actual_until + end;
             log.info("KudaGo API URL: {}", url);
+
             try {
                 ResponseEntity<KudaGoResponse> responseEntity = restTemplate.getForEntity(url, KudaGoResponse.class);
-
                 log.info("Статус ответа KudaGo API: {}", responseEntity.getStatusCode());
+
                 if (responseEntity.getBody() != null) {
                     log.info("Ответ от KudaGo API: {}", responseEntity.getBody());
-
+                    return Arrays.asList(responseEntity.getBody().getResults());
                 } else {
                     log.warn("Ответ от KudaGo API пуст.");
+                    return List.of();
                 }
-
-                return List.of(responseEntity.getBody().getResults());
 
             } catch (HttpClientErrorException e) {
                 log.error("Ошибка клиента при запросе к KudaGo: {}", e.getMessage());

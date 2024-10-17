@@ -8,22 +8,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.tbank.models.CurrencyConversionRequest;
 import org.tbank.models.CurrencyConversionResponse;
 import org.tbank.models.Event;
-import org.tbank.models.KudaGoResponse;
 import org.tbank.service.CurrencyService;
 import org.tbank.service.EventService;
 import org.tbank.service.PriceUtils;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,7 +37,7 @@ public class EventController {
     }
 
     @GetMapping
-    public CompletableFuture<ResponseEntity<List<Event>>> getEvents(
+    public Mono<ResponseEntity<List<Event>>> getEvents(
             @RequestParam("budget") BigDecimal budget,
             @RequestParam("currency") String currency,
             @RequestParam(value = "dateFrom", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
@@ -49,23 +46,25 @@ public class EventController {
         LocalDate start = (dateFrom != null) ? dateFrom : LocalDate.now().with(DayOfWeek.MONDAY);
         LocalDate end = (dateTo != null) ? dateTo : start.plusDays(7);
 
-        CompletableFuture<List<Event>> eventsFuture = eventService.getEventsFromKudaGo(start, end);
+        Mono<List<Event>> eventsMono = eventService.getEventsFromKudaGo(start, end);
 
-        CompletableFuture<Double> convertedBudgetFuture = CompletableFuture.supplyAsync(() -> {
-            CurrencyConversionRequest request = new CurrencyConversionRequest(currency, "RUB", budget);
-            CurrencyConversionResponse response = currencyService.convertCurrency(request);
-            return response.getConvertedAmount();
-        });
-        return eventsFuture.thenCombine(convertedBudgetFuture, (events, convertedBudget) -> {
-            List<Event> suitableEvents = events.stream()
-                    .filter(event -> {
-                        String priceStr = event.getPrice();
-                        BigDecimal price = PriceUtils.extractPrice(priceStr);
-                        return price.compareTo(BigDecimal.valueOf(convertedBudget)) <= 0;
-                    })
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(suitableEvents);
-        });
+        Mono<Double> convertedBudgetMono = currencyService.convertCurrency(new CurrencyConversionRequest(currency, "RUB", budget))
+                .map(CurrencyConversionResponse::getConvertedAmount);
+
+        return Mono.zip(eventsMono, convertedBudgetMono)
+                .flatMap(tuple -> {
+                    List<Event> events = tuple.getT1();
+                    Double convertedBudget = tuple.getT2();
+                    List<Event> suitableEvents = events.stream()
+                            .filter(event -> {
+                                String priceStr = event.getPrice();
+                                BigDecimal price = PriceUtils.extractPrice(priceStr);
+                                return price.compareTo(BigDecimal.valueOf(convertedBudget)) <= 0;
+                            })
+                            .collect(Collectors.toList());
+                    return Mono.just(ResponseEntity.ok(suitableEvents));
+                });
+
 
     }
 
