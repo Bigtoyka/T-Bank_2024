@@ -52,6 +52,10 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.26.3")
     implementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14'
 
+    // reactor
+    // https://mvnrepository.com/artifact/io.projectreactor/reactor-core
+    implementation("io.projectreactor:reactor-core:3.6.11")
+
 
 
 }
