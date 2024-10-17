@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Data
 public class CurrencyConversionRequest {
-
     private String fromCurrency;
     private String toCurrency;
     private BigDecimal amount;

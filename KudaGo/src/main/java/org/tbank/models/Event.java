@@ -7,6 +7,6 @@ import lombok.Data;
 public class Event {
     private Long id;
     private String title;
-    @JsonProperty("price") // Убедитесь, что это поле соответствует имени в JSON
+    @JsonProperty("price")
     private String price;
 }

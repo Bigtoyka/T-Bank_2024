@@ -1,6 +1,5 @@
 package org.tbank.service;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +16,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+
 
 @Slf4j
 @Configuration
@@ -28,19 +32,22 @@ public class DataInitConfig {
     private final ExecutorService fixedThreadPool;
     private final ExecutorService scheduledThreadPool;
     private final Duration initializationSchedule;
+    private final RestTemplate restTemplate;
+
 
     public DataInitConfig(UniversalDAO<Integer, Category> categoryDAO,
                           UniversalDAO<String, Location> locationDAO,
                           KudaGoClient kudaGoClient,
                           @Qualifier("fixedThreadPool") ExecutorService fixedThreadPool,
                           @Qualifier("scheduledThreadPool") ExecutorService scheduledThreadPool,
-                          Duration initializationSchedule) {
+                          Duration initializationSchedule, RestTemplate restTemplate) {
         this.categoryDAO = categoryDAO;
         this.locationDAO = locationDAO;
         this.kudaGoClient = kudaGoClient;
         this.fixedThreadPool = fixedThreadPool;
         this.scheduledThreadPool = scheduledThreadPool;
         this.initializationSchedule = initializationSchedule;
+        this.restTemplate = restTemplate;
     }
 
     @Bean
