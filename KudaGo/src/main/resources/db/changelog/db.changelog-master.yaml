@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Michael
+      changes:
+        - createTable:
+            tableName: location
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: slug
+                  type: varchar(255)
+              - column:
+                  name: name
+                  type: varchar(255)
+
+  - changeSet:
+      id: 2
+      author: Michael
+      changes:
+        - createTable:
+            tableName: events
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 3
+      author: Michael
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: events
+            baseColumnNames: location_id
+            referencedTableName: location
+            referencedColumnNames: id
+            constraintName: fk_events_location

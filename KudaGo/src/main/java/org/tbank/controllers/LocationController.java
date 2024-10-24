@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.tbank.annotations.TimeExecution;
 import org.tbank.models.Location;
+import org.tbank.repository.LocationRepository;
 import org.tbank.service.LocationService;
+import org.tbank.service.ResourceNotFoundException;
 
 import java.util.Collection;
 
@@ -26,38 +28,51 @@ public class LocationController {
     @Autowired
     private final LocationService locationService;
 
-    public LocationController(LocationService locationService) {
+    @Autowired
+    private final LocationRepository locationRepository;
+
+    public LocationController(LocationService locationService, LocationRepository locationRepository) {
         this.locationService = locationService;
+        this.locationRepository = locationRepository;
     }
 
     @GetMapping()
     public ResponseEntity<Collection<Location>> getAllLocations() {
-        return ResponseEntity.ok(locationService.getAllLocation());
+        return ResponseEntity.ok(locationRepository.findAll());
     }
 
     @GetMapping("/{slug}")
     public Location getLocation(@PathVariable("slug") String slug) {
-        return locationService.getLocation(slug);
+        return locationRepository.findBySlug(slug);
     }
 
     @PostMapping()
     public ResponseEntity<String> addLocation(@RequestBody Location location) {
         log.info("Добавить локацию: {}", location.toString());
-        locationService.addLocation(location.getSlug(), location);
+        locationRepository.save(location);
         return ResponseEntity.ok("Локация добавлена");
     }
 
     @PutMapping("/{slug}")
     public ResponseEntity<String> updateLocation(@PathVariable("slug") String slug, @RequestBody Location location) {
         log.info("Обновлуние локации: {}", location.toString());
-        locationService.updateLocation(slug, location);
+        Location existingLocation = locationRepository.findBySlug(slug);
+        if (existingLocation == null) {
+            throw new ResourceNotFoundException("Локация с данным slug не найдена: " + slug);
+        }
+
+        existingLocation.setName(location.getName());
+        existingLocation.setSlug(location.getSlug());
+        locationRepository.save(existingLocation);
+
         return ResponseEntity.ok("Обновление прошло успешно");
     }
 
     @DeleteMapping("/{slug}")
     public ResponseEntity<String> deleteLocation(@PathVariable("slug") String slug) {
         log.info("Удаление категории: {}", slug);
-        locationService.deleteCategory(slug);
+        Location location = locationRepository.findBySlug(slug);
+        locationRepository.delete(location);
         return ResponseEntity.ok("Категория удалена");
     }
 }

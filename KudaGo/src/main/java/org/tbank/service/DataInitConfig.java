@@ -10,9 +10,14 @@ import org.tbank.annotations.TimeExecution;
 import org.tbank.client.KudaGoClient;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Category;
+import org.tbank.models.Event;
 import org.tbank.models.Location;
+import org.tbank.repository.EventRepository;
+import org.tbank.repository.LocationRepository;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +38,9 @@ public class DataInitConfig {
     private final ExecutorService scheduledThreadPool;
     private final Duration initializationSchedule;
     private final RestTemplate restTemplate;
+    private LocationRepository locationRepository;
+    private EventService eventService;
+    private EventRepository eventRepository;
 
 
     public DataInitConfig(UniversalDAO<Integer, Category> categoryDAO,
@@ -40,7 +48,7 @@ public class DataInitConfig {
                           KudaGoClient kudaGoClient,
                           @Qualifier("fixedThreadPool") ExecutorService fixedThreadPool,
                           @Qualifier("scheduledThreadPool") ExecutorService scheduledThreadPool,
-                          Duration initializationSchedule, RestTemplate restTemplate) {
+                          Duration initializationSchedule, RestTemplate restTemplate, LocationRepository locationRepository, EventService eventService, EventRepository eventRepository) {
         this.categoryDAO = categoryDAO;
         this.locationDAO = locationDAO;
         this.kudaGoClient = kudaGoClient;
@@ -48,6 +56,9 @@ public class DataInitConfig {
         this.scheduledThreadPool = scheduledThreadPool;
         this.initializationSchedule = initializationSchedule;
         this.restTemplate = restTemplate;
+        this.locationRepository = locationRepository;
+        this.eventService = eventService;
+        this.eventRepository = eventRepository;
     }
 
     @Bean
@@ -73,6 +84,7 @@ public class DataInitConfig {
         List<Future<Void>> futures = new ArrayList<>();
         futures.add(fixedThreadPool.submit(this::initializeCategories));
         futures.add(fixedThreadPool.submit(this::initializeLocations));
+        futures.add(fixedThreadPool.submit(this::initializeEvents));
         for (Future<Void> future : futures) {
             try {
                 future.get();
@@ -91,6 +103,7 @@ public class DataInitConfig {
             categories.ifPresent(cat -> {
                 for (Category category : cat) {
                     categoryDAO.put(category.getId(), category);
+
                     log.info("Инициализированные категории: {}", category.getId());
                 }
                 log.info("Категории успешно инициализированы");
@@ -107,13 +120,40 @@ public class DataInitConfig {
             Optional<Location[]> locations = kudaGoClient.requestLocation();
             locations.ifPresent(loc -> {
                 for (Location location : loc) {
-                    locationDAO.put(location.getSlug(), location);
+                    locationRepository.save(location);
                     log.info("Инициализированные локации: {}", location.getSlug());
                 }
                 log.info("Локации успешно инициализированы");
             });
         } catch (Exception e) {
             log.error("Ошибка инициализации локаций: ", e);
+        }
+        return null;
+    }
+
+    private Void initializeEvents() {
+        try {
+            log.info("Инициализация событий");
+            LocalDate start = LocalDate.now().with(DayOfWeek.MONDAY);
+            LocalDate end = start.plusDays(7);
+            eventService.getEventsFromKudaGo(start, end)
+                    .doOnNext(events -> {
+                        for (Event event : events) {
+                            Location location = locationRepository.findBySlug(event.getLocation().getSlug());
+                            if (location != null) {
+                                event.setLocation(location);
+                                eventRepository.save(event);
+                                log.info("Инициализированные события: {}", event.getTitle());
+                            } else {
+                                log.warn("Локация для события {} не найдена!", event.getTitle());
+                            }
+                        }
+                        log.info("События успешно инициализированы");
+                    })
+                    .doOnError(e -> log.error("Ошибка инициализации событий: ", e))
+                    .subscribe();
+        } catch (Exception e) {
+            log.error("Ошибка инициализации событий: ", e);
         }
         return null;
     }
