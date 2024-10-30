@@ -14,6 +14,8 @@ import org.tbank.models.Event;
 import org.tbank.models.Location;
 import org.tbank.repository.EventRepository;
 import org.tbank.repository.LocationRepository;
+import org.tbank.service.command.CategoryInitializationCommand;
+import org.tbank.service.command.LocationInitializationCommand;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -82,8 +84,11 @@ public class DataInitConfig {
     private void doInitialization() {
         long startTime = System.currentTimeMillis();
         List<Future<Void>> futures = new ArrayList<>();
-        futures.add(fixedThreadPool.submit(this::initializeCategories));
-        futures.add(fixedThreadPool.submit(this::initializeLocations));
+        CategoryInitializationCommand categoryCommand = new CategoryInitializationCommand(categoryDAO, kudaGoClient);
+        LocationInitializationCommand locationCommand = new LocationInitializationCommand(locationRepository, kudaGoClient);
+
+        futures.add(fixedThreadPool.submit(categoryCommand::execute));
+        futures.add(fixedThreadPool.submit(locationCommand::execute));
         futures.add(fixedThreadPool.submit(this::initializeEvents));
         for (Future<Void> future : futures) {
             try {
