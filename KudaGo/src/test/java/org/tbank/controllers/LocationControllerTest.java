@@ -77,9 +77,9 @@ class LocationControllerTest {
         Mockito.when(locationRepository.save(existingLocation)).thenReturn(updatedLocation);
         mockMvc.perform(put("/api/v1/locations/slug1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updatedLocation))) // Отправляем обновленные данные
-                .andExpect(status().isOk()) // Проверяем статус 200 OK
-                .andExpect(content().string("Обновление прошло успешно")); // Проверяем текст ответа
+                        .content(new ObjectMapper().writeValueAsString(updatedLocation)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Обновление прошло успешно"));
     }
 
     @Test
