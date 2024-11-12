@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:17:///testdb
+    username: test
+    password: test
+  liquibase:
+    enabled: false
