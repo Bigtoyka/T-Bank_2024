@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -31,6 +32,7 @@ class KudaGoClientTest {
 
     @Test
     @DisplayName("Возвращение locations")
+    @WithMockUser
     public void requestLocations_locationsIsNotEmpty_shouldBeNotEmpty() {
         var locations = kudaGoClient.requestLocation();
         assertThat(locations)

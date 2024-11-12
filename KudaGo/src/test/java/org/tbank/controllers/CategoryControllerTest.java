@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.tbank.models.Category;
 import org.tbank.service.CategoryService;
+import org.springframework.security.test.context.support.WithMockUser;
+
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -42,6 +44,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getCategory_SuccessGetCategory_shouldReturnCategoryById() throws Exception {
         Mockito.when(categoryService.getCategory(anyInt())).thenReturn(category1);
 
@@ -53,6 +56,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addCategory_SuccessAddCategory_shouldAddCategory() throws Exception {
         Mockito.doNothing().when(categoryService).addCategory(anyInt(), any(Category.class));
         mockMvc.perform(post("/api/v1/places/categories")
@@ -62,6 +66,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateCategory_SuccessUpdateCategory_shouldUpdateCategory() throws Exception {
         Mockito.doNothing().when(categoryService).updateCategory(anyInt(), any(Category.class));
         mockMvc.perform(put("/api/v1/places/categories/1")
@@ -72,6 +77,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteCategory_SuccessDeleteCategory_shouldDeleteCategory() throws Exception {
         Mockito.doNothing().when(categoryService).deleteCategory(anyInt());
         mockMvc.perform(delete("/api/v1/places/categories/1"))
@@ -79,18 +85,20 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser
     void deleteCategory_IdNotFound_shouldThrowException() throws Exception {
         Mockito.doThrow(new IllegalArgumentException()).when(categoryService).deleteCategory(1);
 
         mockMvc.perform(delete("/api/v1/places/categories/1"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser
     void getCategory_IdNotFound_shouldThrowException() throws Exception {
         Mockito.doThrow(new IllegalArgumentException()).when(categoryService).getCategory(anyInt());
 
         mockMvc.perform(get("/api/v1/places/categories/1"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 }

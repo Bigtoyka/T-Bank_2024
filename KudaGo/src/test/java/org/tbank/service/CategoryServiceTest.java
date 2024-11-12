@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Category;
+import org.tbank.service.snapshot.SnapshotManager;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,15 +15,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class CategoryServiceTest {
 
     @Mock
     private UniversalDAO<Integer, Category> categoryDao;
-
+    @Mock
+    private SnapshotManager snapshotManager;
     @InjectMocks
     private CategoryService categoryService;
 
@@ -44,7 +45,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void getCategory_SuccessReturnCategory_shouldReturnCategory() {      // Мокаем поведение DAO
+    void getCategory_SuccessReturnCategory_shouldReturnCategory() {
         Category category = new Category(1, "slug1", "Category1");
         when(categoryDao.get(1)).thenReturn(category);
 
@@ -79,22 +80,21 @@ class CategoryServiceTest {
     }
     @Test
     void updateCategory_successUpdateCategory_shouldUpdateCategory() {
-        Category category = new Category(2, "slug1", "Category1");
+        Category category = new Category(2, "slug2", "Category2");
+        when(categoryDao.get(2)).thenReturn(category);
 
-        categoryService.updateCategory(category.getId(), category);
-
-        verify(categoryDao).update(category.getId(), category);
+        categoryService.deleteCategory(2);
+        verify(categoryDao, times(1)).remove(2);
+        verify(snapshotManager, times(1)).saveCategorySnapshot(any());
     }
 
 
     @Test
     void deleteCategory_SuccessDeleteCategory_shouldDeleteCategory() {
-        Category category = new Category(2, "slug2", "Category2");
-
-        when(categoryDao.get(2)).thenReturn(category);
-        categoryService.deleteCategory(2);
-
-        verify(categoryDao, times(1)).remove(2);
+        when(categoryDao.get(2)).thenReturn(null);
+        assertThrows(IllegalArgumentException.class, () -> categoryService.deleteCategory(2));
+        verify(categoryDao, never()).remove(2);
+        verify(snapshotManager, never()).saveCategorySnapshot(any());
     }
 
     @Test

@@ -2,11 +2,15 @@ package org.tbank.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Location;
+import org.tbank.service.observer.LocationSubject;
+import org.tbank.service.snapshot.LocationSnapshot;
+import org.tbank.service.snapshot.SnapshotManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 
 class LocationServiceTest {
     @Mock
     private UniversalDAO<String, Location> locationDAO;
+    @Mock
+    private SnapshotManager snapshotManager; // Мокаем SnapshotManager
+
+    @Mock
+    private LocationSubject locationSubject;  // Мокаем LocationSubject
 
     @InjectMocks
     private LocationService locationService;
@@ -64,11 +74,14 @@ class LocationServiceTest {
 
     @Test
     void addLocation() {
-        Location location = new Location(null, "slug2", "Location2",new ArrayList<>());
-
+        Location location = new Location(null, "slug2", "Location2", new ArrayList<>());
         locationService.addLocation("slug2", location);
-
         verify(locationDAO, times(1)).put("slug2", location);
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
+        verify(locationSubject, times(1)).notifyObservers(locationCaptor.capture(), actionCaptor.capture());
+        assertEquals(location, locationCaptor.getValue());
+        assertEquals("ADD", actionCaptor.getValue());
 
     }
 
@@ -83,20 +96,29 @@ class LocationServiceTest {
     @Test
     void updateLocation() {
         Location location = new Location(null, "slug1", "Category1", new ArrayList<>());
-
+        when(locationDAO.get("slug1")).thenReturn(location);
         locationService.updateLocation(location.getSlug(), location);
-
         verify(locationDAO).update(location.getSlug(), location);
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
+        verify(locationSubject, times(1)).notifyObservers(locationCaptor.capture(), actionCaptor.capture());
+        assertEquals(location, locationCaptor.getValue());
+        assertEquals("UPDATE", actionCaptor.getValue());
+        verify(snapshotManager, times(1)).saveLocationSnapshot(any(LocationSnapshot.class));
     }
 
     @Test
     void deleteCategory() {
         Location location = new Location(null, "slug2", "Category2", new ArrayList<>());
-
         when(locationDAO.get("slug2")).thenReturn(location);
         locationService.deleteCategory("slug2");
-
         verify(locationDAO, times(1)).remove("slug2");
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        ArgumentCaptor<String> actionCaptor = ArgumentCaptor.forClass(String.class);
+        verify(locationSubject, times(1)).notifyObservers(locationCaptor.capture(), actionCaptor.capture());
+        assertEquals(location, locationCaptor.getValue());
+        assertEquals("DELETE", actionCaptor.getValue());
+        verify(snapshotManager, times(1)).saveLocationSnapshot(any(LocationSnapshot.class));
     }
 
     @Test

@@ -9,14 +9,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.tbank.models.Location;
+import org.tbank.repository.LocationRepository;
 import org.tbank.service.LocationService;
 
 import java.util.ArrayList;
 
-import static org.mockito.ArgumentMatchers.anyString;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -30,7 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LocationControllerTest {
     @Autowired
     private MockMvc mockMvc;
-
+    @MockBean
+    private LocationRepository locationRepository;
     @MockBean
     private LocationService locationService;
 
@@ -43,16 +48,17 @@ class LocationControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getLocation_SuccessGetLocation_shouldReturnLocationById() throws Exception {
-        Mockito.when(locationService.getLocation(anyString())).thenReturn(location1);
+        Mockito.when(locationRepository.findBySlug(anyString())).thenReturn(location1);
 
         mockMvc.perform(get("/api/v1/locations/slug"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value(location1.getSlug()))
-                .andExpect(jsonPath("$.name").value(location1.getName()));
-    }
+                .andExpect(jsonPath("$.name").value(location1.getName()));    }
 
     @Test
+    @WithMockUser
     void addLocation_SuccessAddLocation_shouldAddLocation() throws Exception {
         Mockito.doNothing().when(locationService).addLocation(anyString(), any(Location.class));
         mockMvc.perform(post("/api/v1/locations")
@@ -63,35 +69,43 @@ class LocationControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateLocation_SuccessUpdateLocation_shouldUpdateLocation() throws Exception {
-        Mockito.doNothing().when(locationService).updateLocation(anyString(), any(Location.class));
-        mockMvc.perform(put("/api/v1/locations/slug")
+        Location existingLocation = new Location(null,"slug1", "Category1", new ArrayList<>());
+        Location updatedLocation = new Location(null,"slug1", "Updated Category", new ArrayList<>());
+        Mockito.when(locationRepository.findBySlug("slug1")).thenReturn(existingLocation);
+        Mockito.when(locationRepository.save(existingLocation)).thenReturn(updatedLocation);
+        mockMvc.perform(put("/api/v1/locations/slug1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(location1)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Обновление прошло успешно"));
+                        .content(new ObjectMapper().writeValueAsString(updatedLocation))) // Отправляем обновленные данные
+                .andExpect(status().isOk()) // Проверяем статус 200 OK
+                .andExpect(content().string("Обновление прошло успешно")); // Проверяем текст ответа
     }
 
     @Test
+    @WithMockUser
     void deleteLocation_SuccessDeleteLocation_shouldDeleteLocation() throws Exception {
-        Mockito.doNothing().when(locationService).deleteCategory(anyString());
-        mockMvc.perform(delete("/api/v1/locations/slug"))
-                .andExpect(status().isOk());
+        Mockito.doNothing().when(locationService).deleteCategory(eq("slug1"));
+        mockMvc.perform(delete("/api/v1/locations/slug1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Категория удалена"));
     }
 
     @Test
+    @WithMockUser
     void deleteLocation_SlugNotFound_shouldThrowException() throws Exception {
-        Mockito.doThrow(new IllegalArgumentException()).when(locationService).deleteCategory(anyString());
+        Mockito.doThrow(new IllegalArgumentException()).when(locationRepository).delete(any());
 
         mockMvc.perform(delete("/api/v1/locations/slug"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser
     void getCategory_SlugNotFound_shouldThrowException() throws Exception {
-        Mockito.doThrow(new IllegalArgumentException()).when(locationService).getLocation(anyString());
+        Mockito.doThrow(new IllegalArgumentException()).when(locationRepository).findBySlug(anyString());
 
         mockMvc.perform(get("/api/v1/locations/slug"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 }
