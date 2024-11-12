@@ -34,6 +34,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Set up Gradle
+        uses: gradle/wrapper-validation-action@v1
+        with:
+          gradle-wrapper-file: './gradlew'
+
       - name: Build with Gradle
         run: ./gradlew build
 
