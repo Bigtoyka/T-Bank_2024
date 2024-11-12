@@ -4,4 +4,4 @@ spring:
     username: test
     password: test
   liquibase:
-    enabled: false
+    enabled: true
