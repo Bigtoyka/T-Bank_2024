@@ -39,6 +39,12 @@ jobs:
         with:
           gradle-wrapper-file: './gradlew'
 
+      - name: Install wait-for-it
+        run: sudo apt-get install -y wait-for-it
+
+      - name: Wait for PostgreSQL to be ready
+        run: wait-for-it localhost:5432 --timeout=30 --strict -- echo "PostgreSQL is up"
+
       - name: Build with Gradle
         run: ./gradlew build
 
