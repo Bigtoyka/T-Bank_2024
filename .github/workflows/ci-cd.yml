@@ -8,27 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: rails_test
-          POSTGRES_USER: rails
-          POSTGRES_PASSWORD: password
-        options: >-
-          --health-cmd="pg_isready -U rails"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      POSTGRES_DB: rails_test
-      POSTGRES_USER: rails
-      POSTGRES_PASSWORD: password
-      RAILS_ENV: test
-      DATABASE_URL: "postgres://rails:password@postgres:5432/rails_test"
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -44,11 +23,8 @@ jobs:
         with:
           gradle-wrapper-file: './gradlew'
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h postgres -U rails; do
-            sleep 1
-          done
+      - name: Install wait-for-it
+        run: sudo apt-get install -y wait-for-it
 
       - name: Build with Gradle
         run: ./gradlew build
