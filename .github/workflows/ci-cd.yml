@@ -38,7 +38,9 @@ jobs:
           gradle-wrapper-file: './gradlew'
 
       - name: Install wait-for-it
-        run: sudo apt-get install -y wait-for-it
+        run: |
+          curl -sSL https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh -o wait-for-it.sh
+          chmod +x wait-for-it.sh
 
       - name: Wait for PostgreSQL to be ready
         run: |
