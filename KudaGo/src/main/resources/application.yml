@@ -26,3 +26,4 @@ spring:
     show-sql: false
   liquibase:
     changelog: classpath:db/changelog/db.changelog-master.yaml
+    enabled: false
