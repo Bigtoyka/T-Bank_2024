@@ -47,6 +47,7 @@ public class EventControllerTest {
 
     @BeforeEach
     void setUp() {
+        postgreSQLContainer.start();
         eventRepository.deleteAll();
         locationRepository.deleteAll();
     }

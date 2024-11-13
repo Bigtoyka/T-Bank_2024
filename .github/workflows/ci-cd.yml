@@ -8,6 +8,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd="pg_isready -U test" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,6 +39,10 @@ jobs:
 
       - name: Install wait-for-it
         run: sudo apt-get install -y wait-for-it
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          ./wait-for-it.sh localhost:5432 --timeout=30 --strict -- echo "PostgreSQL is up"
 
       - name: Build with Gradle
         run: ./gradlew build
