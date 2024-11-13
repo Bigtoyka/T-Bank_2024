@@ -6,10 +6,10 @@ import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
-        List list = new ArrayList();
+        List<Integer> list = new ArrayList();
         list.add(101);
         list.add(102);
-        CustomList customLinkedList = new CustomLinkedList();
+        CustomList<Integer> customLinkedList = new CustomLinkedList();
         customLinkedList.add(1);
         //сделал через sout для наглядности, так же есть тесты
         System.out.println("get: " + customLinkedList.get(0));
@@ -20,7 +20,7 @@ public class Main {
             System.out.println(customLinkedList.get(i));
         }
         //Задание 2
-        Stream<Integer> stream = Stream.of(1,2,3,4,5);
+        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
         CustomLinkedList<Integer> customLinkedList2 = stream.reduce(
                 new CustomLinkedList<>(),
                 (newlist, element) -> {
@@ -31,7 +31,7 @@ public class Main {
                     list1.addAll((List<? extends Integer>) list2);
                     return list1;
                 });
-        for (int i: customLinkedList2) {
+        for (int i : customLinkedList2) {
             System.out.print(i);
         }
     }

@@ -1,7 +1,24 @@
 plugins {
     id 'java'
+    id 'checkstyle'
 }
-
+test {
+    useJUnitPlatform()
+    dependsOn checkstyleMain, checkstyleTest
+}
+checkstyle {
+    toolVersion '10.3.1'
+    configFile file("config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+    maxErrors = 0
+}
+checkstyleMain {
+    source ='src/main/java'
+}
+checkstyleTest {
+    source ='src/test/java'
+}
 group 'org.tbank'
 version '1.0-SNAPSHOT'
 
