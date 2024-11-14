@@ -1,0 +1,28 @@
+server:
+  port: 8080
+api:
+  url:
+    categories: https://kudago.com/public-api/v1.4/place-categories
+    locations: https://kudago.com/public-api/v1.4/locations
+    events: https://kudago.com/public-api/v1.4/events
+app:
+  fixed:
+    threadpool:
+      size: 8
+  scheduled:
+    threadpool:
+      size: 5
+  initialization:
+    schedule: PT1S
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  liquibase:
+    changelog: classpath:db/changelog/db.changelog-master.yaml
