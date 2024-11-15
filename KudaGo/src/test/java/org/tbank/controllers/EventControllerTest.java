@@ -35,10 +35,8 @@ public class EventControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
     private EventRepository eventRepository;
 
-    @MockBean
     private LocationRepository locationRepository;
 
     @Container
