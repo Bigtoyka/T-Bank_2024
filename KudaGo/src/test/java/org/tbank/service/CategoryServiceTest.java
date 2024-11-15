@@ -5,8 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Category;
+import org.tbank.service.snapshot.CategorySnapshot;
+import org.tbank.service.snapshot.SnapshotManager;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -26,6 +31,9 @@ class CategoryServiceTest {
     @InjectMocks
     private CategoryService categoryService;
 
+    @Mock
+    private SnapshotManager snapshotManager;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -33,8 +41,8 @@ class CategoryServiceTest {
 
     @Test
     void getAllCategories_SuccessReturnAllCategories_shouldReturnAllCategories() {
-        Category category1 = new Category(1,"slug1","Category1");
-        Category category2 = new Category(2,"slug2","Category2");
+        Category category1 = new Category(1, "slug1", "Category1");
+        Category category2 = new Category(2, "slug2", "Category2");
         List<Category> categories = Arrays.asList(category1, category2);
 
         when(categoryDao.getAll()).thenReturn(categories);
@@ -77,13 +85,16 @@ class CategoryServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> categoryService.addCategory(2, category));
     }
+
     @Test
     void updateCategory_successUpdateCategory_shouldUpdateCategory() {
         Category category = new Category(2, "slug1", "Category1");
-
+        when(categoryDao.get(2)).thenReturn(category);
         categoryService.updateCategory(category.getId(), category);
 
         verify(categoryDao).update(category.getId(), category);
+        verify(snapshotManager, times(1)).saveCategorySnapshot(any(CategorySnapshot.class));
+
     }
 
 
@@ -95,6 +106,8 @@ class CategoryServiceTest {
         categoryService.deleteCategory(2);
 
         verify(categoryDao, times(1)).remove(2);
+        verify(snapshotManager, times(1)).saveCategorySnapshot(any(CategorySnapshot.class));
+
     }
 
     @Test

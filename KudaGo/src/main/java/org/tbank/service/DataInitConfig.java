@@ -63,14 +63,14 @@ public class DataInitConfig {
         this.eventRepository = eventRepository;
     }
 
-    @Bean
-    @TimeExecution
-    public CommandLineRunner doInit(RestTemplate restTemplate) {
-        return args -> {
-            log.info("Старт инициализации данных");
-            initializeData();
-        };
-    }
+//    @Bean
+//    @TimeExecution
+//    public CommandLineRunner doInit(RestTemplate restTemplate) {
+//        return args -> {
+//            log.info("Старт инициализации данных");
+//            initializeData();
+//        };
+//    }
 
     private void initializeData() {
         if (scheduledThreadPool instanceof ScheduledExecutorService) {
