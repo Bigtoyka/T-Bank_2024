@@ -40,8 +40,7 @@ class KudaGoClientTest {
                                 .isNotEmpty()
                                 .anySatisfy(location ->
                                         assertThat(location.getSlug()).isEqualTo("msk")
-                                )
-                );
+                                ));
     }
 
     @Test
