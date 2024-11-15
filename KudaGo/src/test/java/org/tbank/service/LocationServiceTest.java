@@ -7,6 +7,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Location;
+import org.tbank.service.observer.LocationSubject;
+import org.tbank.service.snapshot.LocationSnapshot;
+import org.tbank.service.snapshot.SnapshotManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -23,9 +27,14 @@ import static org.mockito.Mockito.times;
 class LocationServiceTest {
     @Mock
     private UniversalDAO<String, Location> locationDAO;
-
+    @Mock
+    private LocationSubject locationSubject;
+    @Mock
+    private LocationSnapshot locationSnapshot;
     @InjectMocks
     private LocationService locationService;
+    @Mock
+    private SnapshotManager snapshotManager;
 
     @BeforeEach
     void setUp() {
@@ -35,7 +44,7 @@ class LocationServiceTest {
 
     @Test
     void getAllLocation() {
-        Location location1 = new Location(null,"slug1", "Location1", new ArrayList<>());
+        Location location1 = new Location(null, "slug1", "Location1", new ArrayList<>());
         Location location2 = new Location(null, "slug2", "Location2", new ArrayList<>());
         List<Location> locations = Arrays.asList(location1, location2);
 
@@ -64,17 +73,18 @@ class LocationServiceTest {
 
     @Test
     void addLocation() {
-        Location location = new Location(null, "slug2", "Location2",new ArrayList<>());
+        Location location = new Location(null, "slug2", "Location2", new ArrayList<>());
 
         locationService.addLocation("slug2", location);
 
         verify(locationDAO, times(1)).put("slug2", location);
+        verify(locationSubject, times(1)).notifyObservers(location, "ADD");
 
     }
 
     @Test
     public void addLocation_AlreadyExists_shouldThrowException() {
-        Location location = new Location(null, "slug2", "Category2",new ArrayList<>());
+        Location location = new Location(null, "slug2", "Category2", new ArrayList<>());
         when(locationDAO.get("slug2")).thenReturn(location);
 
         assertThrows(IllegalArgumentException.class, () -> locationService.addLocation("slug2", location));
@@ -84,9 +94,13 @@ class LocationServiceTest {
     void updateLocation() {
         Location location = new Location(null, "slug1", "Category1", new ArrayList<>());
 
+        when(locationDAO.get("slug1")).thenReturn(location);
+
         locationService.updateLocation(location.getSlug(), location);
 
         verify(locationDAO).update(location.getSlug(), location);
+        verify(snapshotManager, times(1)).saveLocationSnapshot(any(LocationSnapshot.class));
+
     }
 
     @Test
@@ -97,6 +111,9 @@ class LocationServiceTest {
         locationService.deleteCategory("slug2");
 
         verify(locationDAO, times(1)).remove("slug2");
+        verify(snapshotManager, times(1)).saveLocationSnapshot(any(LocationSnapshot.class));
+        verify(locationSubject, times(1)).notifyObservers(location, "DELETE");
+
     }
 
     @Test

@@ -81,7 +81,7 @@ public class AuthController {
             String resetToken = request.get("token");
             String verificationCode = request.get("confirmationCode");
             String newPassword = request.get("newPassword");
-        log.info("token: " + resetToken);
+            log.info("token: " + resetToken);
             userService.resetPassword(resetToken, verificationCode, newPassword);
 
             return ResponseEntity.ok("Пароль успешно сброшен!");

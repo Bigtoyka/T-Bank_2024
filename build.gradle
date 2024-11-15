@@ -1,5 +1,17 @@
 plugins {
     id 'java'
+    id 'checkstyle'
+}
+
+checkstyle {
+    toolVersion = '10.3.1'
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+    maxErrors = 0
+}
+checkstyleMain {
+    source ='src/main/java'
 }
 
 group 'org.tbank'

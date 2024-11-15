@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.tbank.models.Event;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@WithMockUser
 public class EventControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -56,15 +58,15 @@ public class EventControllerTest {
         Location savedLocation = locationRepository.save(location);
 
         String eventJson = String.format("""
-            {
-                "title": "Test Event",
-                "startDate": "%s",
-                "price": "100",
-                "location": {
-                    "id": %d
-                }
-            }
-        """, LocalDateTime.now().toString(), savedLocation.getId());
+                    {
+                        "title": "Test Event",
+                        "startDate": "%s",
+                        "price": "100",
+                        "location": {
+                            "id": %d
+                        }
+                    }
+                """, LocalDateTime.now().toString(), savedLocation.getId());
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,16 +92,16 @@ public class EventControllerTest {
         Event savedEvent = eventRepository.save(event);
 
         String updateJson = String.format("""
-            {
-                "id": %d,
-                "title": "Updated Event",
-                "startDate": "%s",
-                "price": "150",
-                "location": {
-                    "id": %d
-                }
-            }
-        """, savedEvent.getId(), LocalDateTime.now().toString(), savedLocation.getId());
+                    {
+                        "id": %d,
+                        "title": "Updated Event",
+                        "startDate": "%s",
+                        "price": "150",
+                        "location": {
+                            "id": %d
+                        }
+                    }
+                """, savedEvent.getId(), LocalDateTime.now().toString(), savedLocation.getId());
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
