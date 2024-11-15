@@ -70,6 +70,7 @@ jobs:
         with:
           name: coverage-report
           path: app/build/reports/jacoco/test/html
+
   lint:
     runs-on: ubuntu-latest
     needs: test
