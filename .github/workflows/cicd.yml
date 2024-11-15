@@ -8,13 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     services:
-      docker:
-        image: docker:19.03.12
-        options: --privileged
+      wiremock:
+        image: wiremock/wiremock:2.35.0
         ports:
-          - 5000:5000
+          - 8080:8080
+        options: --health-cmd="curl --silent --fail http://localhost:8080/__admin/health" --health-interval=10s --health-timeout=5s --health-retries=5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
