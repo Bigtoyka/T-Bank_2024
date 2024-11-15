@@ -58,15 +58,15 @@ public class EventControllerTest {
         Location savedLocation = locationRepository.save(location);
 
         String eventJson = String.format("""
-            {
-                "title": "Test Event",
-                "startDate": "%s",
-                "price": "100",
-                "location": {
-                    "id": %d
-                }
-            }
-        """, LocalDateTime.now().toString(), savedLocation.getId());
+                    {
+                        "title": "Test Event",
+                        "startDate": "%s",
+                        "price": "100",
+                        "location": {
+                            "id": %d
+                        }
+                    }
+                """, LocalDateTime.now().toString(), savedLocation.getId());
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,16 +92,16 @@ public class EventControllerTest {
         Event savedEvent = eventRepository.save(event);
 
         String updateJson = String.format("""
-            {
-                "id": %d,
-                "title": "Updated Event",
-                "startDate": "%s",
-                "price": "150",
-                "location": {
-                    "id": %d
-                }
-            }
-        """, savedEvent.getId(), LocalDateTime.now().toString(), savedLocation.getId());
+                    {
+                        "id": %d,
+                        "title": "Updated Event",
+                        "startDate": "%s",
+                        "price": "150",
+                        "location": {
+                            "id": %d
+                        }
+                    }
+                """, savedEvent.getId(), LocalDateTime.now().toString(), savedLocation.getId());
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
