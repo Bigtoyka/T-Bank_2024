@@ -8,12 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      wiremock:
-        image: wiremock/wiremock:2.35.0
-        ports:
-          - 8080:8080
-        options: --health-cmd="curl --silent --fail http://localhost:8080/__admin/health" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout code
@@ -34,12 +28,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
-    services:
-      wiremock:
-        image: wiremock/wiremock:2.35.0
-        ports:
-          - 8080:8080
-        options: --health-cmd="curl --silent --fail http://localhost:8080/__admin/health" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout code
@@ -54,14 +42,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Wait for WireMock container to be ready
-        run: |
-          echo "Waiting for WireMock container to be available"
-          until curl --silent --fail http://localhost:8080/__admin/health; do
-            echo "Waiting for WireMock to start..."
-            sleep 5
-          done
-
       - name: Run tests with coverage
         run: ./gradlew test jacocoTestReport
 
@@ -70,7 +50,6 @@ jobs:
         with:
           name: coverage-report
           path: app/build/reports/jacoco/test/html
-
   lint:
     runs-on: ubuntu-latest
     needs: test
