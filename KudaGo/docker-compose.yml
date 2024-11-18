@@ -1,0 +1,10 @@
+version: '3'
+services:
+  rabbitmq:
+    image: "rabbitmq:management"
+    ports:
+      - "15672:15672"  # Для доступа к панели управления RabbitMQ
+      - "5672:5672"    # Стандартный порт для RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
