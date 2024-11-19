@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: app/build/reports/jacoco/test/html
+          path: build/reports/jacoco/test/html
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest
@@ -51,4 +51,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: checkstyle-report
-          path: app/build/reports/checkstyle
+          path: build/reports/checkstyle
