@@ -62,11 +62,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -f app/Dockerfile -t ghcr.io/${{ github.repository }}/app:latest .
-          docker tag ghcr.io/${{ github.repository }}/app:latest ghcr.io/${{ github.repository }}/app:${{ github.sha }}
+          docker build -f app/Dockerfile -t ghcr.io/bigtoyka/t-bank_2024/app:latest .
+          docker tag ghcr.io/bigtoyka/t-bank_2024/app:latest ghcr.io/bigtoyka/t-bank_2024/app:${{ github.sha }}
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}/app:latest
-          docker push ghcr.io/${{ github.repository }}/app:${{ github.sha }}
+          docker push ghcr.io/bigtoyka/t-bank_2024/app:latest
+          docker push ghcr.io/bigtoyka/t-bank_2024/app:${{ github.sha }}
 
