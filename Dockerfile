@@ -1,7 +1,7 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
-WORKDIR /app
+WORKDIR /t_bank_2024
 
-COPY app/build/libs/*.jar app.jar
+COPY build/libs/*.jar app.jar
 
 CMD ["java", "-jar", "app.jar"]
