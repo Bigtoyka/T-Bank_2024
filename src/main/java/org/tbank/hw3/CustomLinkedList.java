@@ -2,7 +2,6 @@ package org.tbank.hw3;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CustomLinkedList<T> implements CustomList<T> {
     Node first;
@@ -133,13 +132,6 @@ public class CustomLinkedList<T> implements CustomList<T> {
                 T o = node.value;
                 node = node.next;
                 return o;
-            }
-            @Override
-            public void forEachRemaining(Consumer<? super T> action) {
-                while (node != null) {
-                    action.accept(node.value);
-                    node = node.next;
-                }
             }
         };
     }

@@ -8,7 +8,6 @@ import org.mockito.MockitoAnnotations;
 import org.tbank.dao.UniversalDAO;
 import org.tbank.models.Location;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -30,13 +29,12 @@ class LocationServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
     }
 
     @Test
     void getAllLocation() {
-        Location location1 = new Location(null,"slug1", "Location1", new ArrayList<>());
-        Location location2 = new Location(null, "slug2", "Location2", new ArrayList<>());
+        Location location1 = new Location("slug1", "Location1");
+        Location location2 = new Location("slug2", "Location2");
         List<Location> locations = Arrays.asList(location1, location2);
 
         when(locationDAO.getAll()).thenReturn(locations);
@@ -47,7 +45,7 @@ class LocationServiceTest {
 
     @Test
     void getLocation() {
-        Location location = new Location(null, "slug1", "Category1", new ArrayList<>());
+        Location location = new Location("slug1", "Category1");
         when(locationDAO.get("slug1")).thenReturn(location);
 
         Location result = locationService.getLocation("slug1");
@@ -64,7 +62,7 @@ class LocationServiceTest {
 
     @Test
     void addLocation() {
-        Location location = new Location(null, "slug2", "Location2",new ArrayList<>());
+        Location location = new Location("slug2", "Location2");
 
         locationService.addLocation("slug2", location);
 
@@ -74,7 +72,7 @@ class LocationServiceTest {
 
     @Test
     public void addLocation_AlreadyExists_shouldThrowException() {
-        Location location = new Location(null, "slug2", "Category2",new ArrayList<>());
+        Location location = new Location("slug2", "Category2");
         when(locationDAO.get("slug2")).thenReturn(location);
 
         assertThrows(IllegalArgumentException.class, () -> locationService.addLocation("slug2", location));
@@ -82,7 +80,7 @@ class LocationServiceTest {
 
     @Test
     void updateLocation() {
-        Location location = new Location(null, "slug1", "Category1", new ArrayList<>());
+        Location location = new Location("slug1", "Category1");
 
         locationService.updateLocation(location.getSlug(), location);
 
@@ -91,7 +89,7 @@ class LocationServiceTest {
 
     @Test
     void deleteCategory() {
-        Location location = new Location(null, "slug2", "Category2", new ArrayList<>());
+        Location location = new Location("slug2", "Category2");
 
         when(locationDAO.get("slug2")).thenReturn(location);
         locationService.deleteCategory("slug2");

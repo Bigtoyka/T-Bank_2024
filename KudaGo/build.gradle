@@ -30,6 +30,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-test-autoconfigure:3.3.4")
 
 
+
     // AspectJ
     implementation 'org.aspectj:aspectjweaver:1.9.22.1'
     implementation 'org.springframework.boot:spring-boot-starter-aop:3.3.4'
@@ -43,6 +44,7 @@ dependencies {
 
     // Testcontainers
     testImplementation 'org.testcontainers:junit-jupiter:1.18.2'
+// https://mvnrepository.com/artifact/org.testcontainers/testcontainers
     testImplementation("org.testcontainers:testcontainers:1.18.2")
 
     // WireMock
@@ -50,25 +52,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.26.3")
     implementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14'
 
-    // reactor
-    implementation("io.projectreactor:reactor-core:3.6.11")
 
-    //SQL
-    implementation("org.liquibase:liquibase-core:4.29.2")
-    implementation("org.postgresql:postgresql:42.7.4")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.3.4")
-    testImplementation 'org.testcontainers:testcontainers:1.17.6'
-    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
-    testImplementation 'org.testcontainers:postgresql:1.17.6'
-
-    //Spring security
-    implementation("org.springframework.security:spring-security-core:6.3.4")
-    implementation("org.springframework.security:spring-security-web:6.3.4")
-    implementation("org.springframework.security:spring-security-config:6.3.4")
-    //JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 }
 
@@ -97,6 +81,4 @@ jacocoTestReport {
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }
-tasks.withType(JavaCompile) {
-    options.compilerArgs << '-parameters'
-}
+

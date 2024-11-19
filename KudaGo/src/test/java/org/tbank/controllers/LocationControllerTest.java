@@ -13,8 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.tbank.models.Location;
 import org.tbank.service.LocationService;
 
-import java.util.ArrayList;
-
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,7 +37,7 @@ class LocationControllerTest {
 
     @BeforeEach
     void setUp() {
-        location1 = new Location(null, "slug1", "Category1",new ArrayList<>());
+        location1 = new Location("slug1", "Category1");
     }
 
     @Test

@@ -20,7 +20,6 @@ public class KudaGoClient {
     @Value("${api.url.locations}")
     private String KUDAGO_API_URL_LOCATION;
 
-
     public KudaGoClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
