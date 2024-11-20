@@ -10,7 +10,15 @@ checkstyle {
     maxErrors = 0
 }
 checkstyleMain {
-    source ='src/main/java'
+    source = 'src/main/java'
+}
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = true
+        html.required = true
+        html.outputLocation = file("build/reports/checkstyle/main.html") // путь для HTML-отчета
+        xml.outputLocation = file("build/reports/checkstyle/main.xml") // путь для XML-отчета
+    }
 }
 group 'org.tbank'
 version '1.0-SNAPSHOT'
