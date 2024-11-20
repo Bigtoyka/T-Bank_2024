@@ -16,9 +16,9 @@ app:
     schedule: PT1S
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
-    password: postgres
+    password: 1
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
