@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: t-bank_2024/build/reports/jacoco/test/html
+          path: KudaGo/build/jacocoHtml
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest
