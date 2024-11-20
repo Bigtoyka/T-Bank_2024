@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: app/build/reports/jacoco/test/html
+          path: t-bank_2024/build/reports/jacoco/test/html
 
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: checkstyle-report
-          path: app/build/reports/checkstyle
+          path: t-bank_2024/build/reports/checkstyle
 
       - name: Log in to GitHub Packages Docker Registry
         uses: docker/login-action@v3
