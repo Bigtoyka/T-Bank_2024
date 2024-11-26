@@ -1,0 +1,21 @@
+Benchmark                                                  (configuration)   Mode  Cnt     Score     Error   Units
+o.t.kafka.KafkaBenchmarks.kafkaBench                                simple  thrpt    3     0,009 ±   0,001  ops/ms
+o.t.kafka.KafkaBenchmarks.kafkaBench                        load_balancing  thrpt    3     0,009 ±   0,001  ops/ms
+o.t.kafka.KafkaBenchmarks.kafkaBench                    multiple_consumers  thrpt    3     0,003 ±   0,001  ops/ms
+o.t.kafka.KafkaBenchmarks.kafkaBench     load_balancing_multiple_consumers  thrpt    3     0,003 ±   0,001  ops/ms
+o.t.kafka.KafkaBenchmarks.kafkaBench                           stress_test  thrpt    3     0,001 ±   0,001  ops/ms
+o.t.rabbit.RabbitBenchmarks.rabbitBench                             simple  thrpt    3     0,514 ±   2,214  ops/ms
+o.t.rabbit.RabbitBenchmarks.rabbitBench                     load_balancing  thrpt    3     0,375 ±   1,172  ops/ms
+o.t.rabbit.RabbitBenchmarks.rabbitBench                 multiple_consumers  thrpt    3     0,187 ±   0,772  ops/ms
+o.t.rabbit.RabbitBenchmarks.rabbitBench  load_balancing_multiple_consumers  thrpt    3     0,163 ±   0,521  ops/ms
+o.t.rabbit.RabbitBenchmarks.rabbitBench                        stress_test  thrpt    3     0,028 ±   0,159  ops/ms
+o.t.kafka.KafkaBenchmarks.kafkaBench                                simple   avgt    3   110,335 ±   5,277   ms/op
+o.t.kafka.KafkaBenchmarks.kafkaBench                        load_balancing   avgt    3   113,847 ±   6,957   ms/op
+o.t.kafka.KafkaBenchmarks.kafkaBench                    multiple_consumers   avgt    3   330,809 ±   7,885   ms/op
+o.t.kafka.KafkaBenchmarks.kafkaBench     load_balancing_multiple_consumers   avgt    3   332,305 ±  19,964   ms/op
+o.t.kafka.KafkaBenchmarks.kafkaBench                           stress_test   avgt    3  1114,358 ±  37,265   ms/op
+o.t.rabbit.RabbitBenchmarks.rabbitBench                             simple   avgt    3     1,875 ±   5,288   ms/op
+o.t.rabbit.RabbitBenchmarks.rabbitBench                     load_balancing   avgt    3     2,234 ±   1,821   ms/op
+o.t.rabbit.RabbitBenchmarks.rabbitBench                 multiple_consumers   avgt    3    12,592 ± 109,157   ms/op
+o.t.rabbit.RabbitBenchmarks.rabbitBench  load_balancing_multiple_consumers   avgt    3     6,537 ±  25,353   ms/op
+o.t.rabbit.RabbitBenchmarks.rabbitBench                        stress_test   avgt    3    34,174 ± 384,848   ms/op
