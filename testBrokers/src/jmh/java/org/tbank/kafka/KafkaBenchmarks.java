@@ -28,10 +28,10 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
 @Warmup(iterations = 1)
-@Measurement(iterations = 3)
+@Measurement(iterations = 10)
 @State(Scope.Thread)
 public class KafkaBenchmarks {
     private List<KafkaProducer<String, String>> producers;

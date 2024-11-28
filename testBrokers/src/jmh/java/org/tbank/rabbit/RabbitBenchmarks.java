@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @Fork(1)
 @Warmup(iterations = 1)
-@Measurement(iterations = 3)
+@Measurement(iterations = 5)
 @State(Scope.Thread)
 public class RabbitBenchmarks {
     private List<RabbitProducer> producers;
@@ -87,9 +87,11 @@ public class RabbitBenchmarks {
         consumers.forEach(consumer -> {
             try {
                 String message = consumer.getMessage();
-                blackhole.consume(message);
+                if (message != null) {
+                    blackhole.consume(message);
+                }
             } catch (IOException e) {
-                throw new RuntimeException("Ошибка ", e);
+                throw new RuntimeException("Ошибка получения сообщения ", e);
             }
             blackhole.consume(consumer);
         });

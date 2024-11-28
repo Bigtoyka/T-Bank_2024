@@ -26,8 +26,12 @@ public class RabbitProducer {
 
     public void close() {
         try {
-            channel.close();
-            connection.close();
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+            }
+            if (connection != null && connection.isOpen()) {
+                connection.close();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
