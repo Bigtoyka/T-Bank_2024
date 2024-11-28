@@ -1,2 +1,4 @@
 rootProject.name = 'T-Bank_2024'
 include 'KudaGo', 'StarterExecution','CbrApp'
+include 'testBrokers'
+
